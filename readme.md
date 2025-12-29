@@ -2,7 +2,7 @@
 
 This repository contains the implementation of the code for the paper "Stationary MMD Points"[https://arxiv.org/abs/2505.20754]. See below for an illustration of stationary MMD points.
 
-![Stationary MMD Points](./figure/illustration.png)
+![Stationary MMD Points](./figures/illustration.png)
 
 ## Installation
 
