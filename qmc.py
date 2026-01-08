@@ -19,7 +19,7 @@ jax.config.update("jax_enable_x64", True)
 
 
 def get_config():
-    parser = argparse.ArgumentParser(description='mmd_flow_cubature')
+    parser = argparse.ArgumentParser(description='stationary_mmd')
 
     # Args settings
     parser.add_argument('--seed', type=int, default=42)

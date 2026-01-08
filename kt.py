@@ -20,10 +20,10 @@ from mmd_flow.kernels import kme_RBF_Gaussian_func
 from functools import partial
 from goodpoints.jax.sliceable_points import SliceablePoints
 jax.config.update("jax_enable_x64", True)
-jax.config.update("jax_platform_name", "cpu")
+# jax.config.update("jax_platform_name", "cpu")
 
 def get_config():
-    parser = argparse.ArgumentParser(description='stationary_mmd')
+    parser = argparse.ArgumentParser(description='mmd_flow_cubature')
 
     # Args settings
     parser.add_argument('--seed', type=int, default=42)
@@ -31,11 +31,12 @@ def get_config():
     parser.add_argument('--kernel', type=str, default='Gaussian')
     parser.add_argument('--step_size', type=float, default=0.1) # Step size will be rescaled by lmbda, the actual step size = step size * lmbda
     parser.add_argument('--save_path', type=str, default='./results/')
-    parser.add_argument('--bandwidth', type=float, default=0.1)
+    parser.add_argument('--bandwidth', type=float, default=1.0)
     parser.add_argument('--step_num', type=int, default=100, help='Number of KT-swap iterations')
     parser.add_argument('--m', type=int, default=4)
     parser.add_argument('--inject_noise_scale', type=float, default=0.0)
     parser.add_argument('--integrand', type=str, default='neg_exp')
+    parser.add_argument('--g', type=int, default=0)
     args = parser.parse_args()  
     return args
 
@@ -45,7 +46,7 @@ def create_dir(args):
     args.save_path += f"kt/{args.dataset}_dataset/{args.kernel}_kernel/"
     args.save_path += f"__step_size_{round(args.step_size, 8)}__bandwidth_{args.bandwidth}__step_num_{args.step_num}"
     args.save_path += f"__particle_num_{2 ** int(args.m)}__inject_noise_scale_{args.inject_noise_scale}"
-    args.save_path += f"__seed_{args.seed}"
+    args.save_path += f"__g_{args.g}__seed_{args.seed}"
     os.makedirs(args.save_path, exist_ok=True)
     with open(f'{args.save_path}/configs', 'wb') as handle:
         pickle.dump(vars(args), handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -170,7 +171,7 @@ def main(args):
         nout_pow2 = 2**int(np.ceil(np.log2(particle_num)))
         # Thin down from sample size n = particle_num * nout_pow2 * 2^g
         n_split = particle_num * nout_pow2
-        g = 2
+        g = args.g
         n = n_split * (2**g)
         X = distribution.sample(n, rng_key)
         # Prepare first n_split input points for KT-split
